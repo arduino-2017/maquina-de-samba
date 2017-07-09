@@ -15,7 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <AFMotor.h>
+#include <Adafruit_MotorShield.h>
 #include <MIDI.h>
 
 /*
@@ -29,12 +29,14 @@
 
 MIDI_CREATE_DEFAULT_INSTANCE();
 
-AF_DCMotor motor0(1);
-AF_DCMotor motor1(2);
-AF_DCMotor motor2(3);
-AF_DCMotor motor3(4);
+Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
 
-AF_DCMotor motores[] = {
+Adafruit_DCMotor *motor0 = AFMS.getMotor(1);
+Adafruit_DCMotor *motor1 = AFMS.getMotor(2);
+Adafruit_DCMotor *motor2 = AFMS.getMotor(3);
+Adafruit_DCMotor *motor3 = AFMS.getMotor(4);
+
+Adafruit_DCMotor *motores[] = {
     motor0,
     motor1,
     motor2,
@@ -53,11 +55,12 @@ unsigned long releaseTimes[] = {0, 0, 0, 0};
 
 
 void setup() {
+    AFMS.begin();
     for(uint8_t idx=0; idx < 4; idx++) {
-        AF_DCMotor mot = motores[idx];
+        Adafruit_DCMotor *mot = motores[idx];
 
-        mot.setSpeed(255);
-        mot.run(RELEASE);
+        mot->setSpeed(255);
+        mot->run(RELEASE);
     }
 
     MIDI.setHandleNoteOn(handleNoteOn);
@@ -83,15 +86,15 @@ void loop() {
                 releaseTimes[idx] += 1;
             }
 
-            AF_DCMotor mot = motores[idx];
-            mot.run(BACKWARD);
+            Adafruit_DCMotor *mot = motores[idx];
+            mot->run(BACKWARD);
         }
 
         if (releaseTimes[idx] && abs(releaseTimes[idx] - now) > HOLD_TIME) {
             releaseTimes[idx] = 0;
 
-            AF_DCMotor mot = motores[idx];
-            mot.run(RELEASE);
+            Adafruit_DCMotor *mot = motores[idx];
+            mot->run(RELEASE);
         }
     }
 }
@@ -136,8 +139,8 @@ void handleNoteOn(byte channel, byte pitch, byte velocity)
             upTimes[idx] += 1;
         }
 
-        AF_DCMotor mot = motores[idx];
-        mot.run(FORWARD);
+        Adafruit_DCMotor *mot = motores[idx];
+        mot->run(FORWARD);
     }
 }
 
